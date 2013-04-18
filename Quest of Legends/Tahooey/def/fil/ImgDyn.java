@@ -116,7 +116,7 @@ public class ImgDyn {
 	}
 	
 	public static BufferedImage loadFromDirectory(String i) throws IOException{
-		String SEP = System.getProperty("file.separator");
+		String SEP = "/";
 		File f = new File(defaultDirectory()+def.Frame.QOL.mapName+SEP+i);
 		return ImageIO.read(f);
 	}

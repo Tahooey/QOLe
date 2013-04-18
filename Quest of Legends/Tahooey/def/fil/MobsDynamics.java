@@ -42,7 +42,7 @@ public class MobsDynamics {
 	}
 	
 	public static File getFileInData(String i){
-		String SEP = System.getProperty("file.separator");
+		String SEP = "/";
 		return new File(defaultDirectory()+def.Frame.QOL.mapName+SEP+i);
 	}
 	
