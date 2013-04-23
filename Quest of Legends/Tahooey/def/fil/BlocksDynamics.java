@@ -86,7 +86,7 @@ public class BlocksDynamics {
 		String os = System.getProperty("os.name").toUpperCase();
 		String folder = "";
 		
-		String SEP = "/";
+		String SEP =  System.getProperty("file.separator");
 
 		if(os.contains("MAC")){
 			folder = System.getProperty("user.home") + SEP + "Library" + SEP + "Application Support" + SEP + "Tahooey"+SEP+"QOL"+SEP;

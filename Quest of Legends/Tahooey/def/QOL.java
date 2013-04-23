@@ -78,7 +78,7 @@ public class QOL extends JPanel implements Runnable {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if(gameIsRunning){
+				if(gameIsRunning&&!Frame.needsNewJar){
 					MobsOnMap.m[mobControlled].move(Frame.STILL);
 				}
 			}
@@ -182,7 +182,7 @@ public class QOL extends JPanel implements Runnable {
 		String os = System.getProperty("os.name").toUpperCase();
 		String folder = "";
 		
-		String SEP = System.getProperty("file.separator");
+		String SEP =  System.getProperty("file.separator");
 
 		if(os.contains("MAC")){
 			folder = System.getProperty("user.home") + SEP + "Library" + SEP + "Application Support" + SEP + "Tahooey"+SEP+"QOL"+SEP;
@@ -211,13 +211,16 @@ public class QOL extends JPanel implements Runnable {
 
 	public void draw(Graphics g) {
 		g.setColor(Color.blue);
-		if(gameIsRunning&&!menuIsOpen){
+		if(Frame.needsNewJar){
+			g.drawString("YOU NEED A NEW JAR FILE, CHECK OUT @Tahooey's TWITTER FEED FOR MORE INFO!!",30,30);
+		}
+		if(gameIsRunning&&!menuIsOpen&&!Frame.needsNewJar){
 			WorldRunner.drawBlocksLower(g);
 			WorldRunner.drawMobs(g);
 			WorldRunner.drawBlocksHigher(g);
 		}
 		if(menuIsOpen&&!gameIsRunning){
-			g.drawImage(ImgDyn.MENU, 0, 20, W, H, null);
+			g.drawImage(ImgDyn.MENU, 0, 0, W, H, null);
 			if(!loaded&&loading){
 				g.setColor(Color.blue);
 				g.drawString("Loading your Game",30,30);
@@ -230,9 +233,6 @@ public class QOL extends JPanel implements Runnable {
 				}else{
 					g.drawString("Press P to Start the Game!",30,30);
 				}
-			}
-			if(Frame.needsNewJar){
-				g.drawString("YOU NEED A NEW JAR FILE, CHECK OUT @Tahooey's TWITTER FEED FOR MORE INFO!!",30,30);
 			}
 		}
 	}
@@ -344,7 +344,7 @@ public class QOL extends JPanel implements Runnable {
 	public void checkMapVersion(){
 		boolean FileExists=true;
 		int thisMapVersion=0,onlineMapVersion=0;
-		File f = new File(defaultDirectory()+mapName+"/version.qol");
+		File f = new File(defaultDirectory()+mapName+System.getProperty("file.separator")+"version.qol");
 		Scanner s;
 		try {
 			if(f.exists()){
@@ -352,14 +352,18 @@ public class QOL extends JPanel implements Runnable {
 				thisMapVersion=s.nextInt();
 			}else{
 				FileExists=false;
+				try {
+					f.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		if(FileExists){
 			try {
-				s=new Scanner(new URL(def.Frame.getInternetFile("version.qol")).openStream());
-				
+				s=new Scanner(new URL(def.Frame.getInternetFile("version.qol")).openStream());				
 				onlineMapVersion=s.nextInt();
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -370,24 +374,41 @@ public class QOL extends JPanel implements Runnable {
 			if(thisMapVersion!=onlineMapVersion){
 				willDownload=true;
 			}
+		}else{
+			try {
+				s=new Scanner(new URL(def.Frame.getInternetFile("version.qol")).openStream());				
+				onlineMapVersion=s.nextInt();
+				
+				FileWriter fw = new FileWriter(f);
+				
+				fw.write(onlineMapVersion);
+				
+				fw.flush();
+				fw.close();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+		System.out.println("Checked Map Version");
 	}
 	
 	public void bootGame(){
 		loading=true;
 		CheckJarVersion();
 		if(!Frame.needsNewJar){
-		BlocksDynamics.boot();
-		MobsDynamics.boot();
-		ImgDyn.createImages();
-		ImgDyn.loadTerrainSheet();
-		ImgDyn.loadMobs();
-		ImgDyn.splitMobs();
-		MobsOnMap.boot();
-		World.boot();
-		WorldRunner.build();
-		getControlledMob();
-		loaded=true;
+			BlocksDynamics.boot();
+			MobsDynamics.boot();
+			ImgDyn.createImages();
+			ImgDyn.loadTerrainSheet();
+			ImgDyn.loadMobs();
+			ImgDyn.splitMobs();
+			MobsOnMap.boot();
+			World.boot();
+			WorldRunner.build();
+			getControlledMob();
+			loaded=true;
 		}
 		loading=false;
 	}
